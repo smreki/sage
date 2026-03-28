@@ -1,0 +1,33 @@
+{
+  "name": "@jam/sage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "sage": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "start": "bun run src/index.ts",
+    "build": "DEV=false bun build ./src/index.ts --target bun --outdir ./dist",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.10.1",
+    "@github/copilot-sdk": "^0.2.0",
+    "commander": "^14.0.1",
+    "conf": "^14.0.0",
+    "execa": "^9.6.0",
+    "ink": "^5.2.1",
+    "picocolors": "^1.1.1",
+    "react": "^18.3.1",
+    "react-devtools-core": "^5.3.2",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "@types/react": "^18.3.12",
+    "typescript": "^5.9.3"
+  }
+}
