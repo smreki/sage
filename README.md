@@ -15,7 +15,7 @@ It is currently focused on one core workflow:
 - provider abstraction for future AI backends
 - current provider: GitHub Copilot
 - prompt-driven CLI with `commander` and `@clack/prompts`
-- Ink-based response rendering
+- response rendering with `@clack/prompts` and `picocolors`
 - safe suggested-command execution with local blocking rules
 - short mode by default, with optional full output and usage details
 
