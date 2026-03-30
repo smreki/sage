@@ -9,7 +9,6 @@ export type AIModelInfo = {
 };
 
 export type AIUsageEvent = {
-  model: string;
   inputTokens?: number;
   outputTokens?: number;
   cacheReadTokens?: number;
@@ -34,6 +33,8 @@ export type AIProviderClient = {
   provider: AIProviderName;
   authLabel: string;
   availableModels: AIModelInfo[];
-  createSession(options: CreateAIProviderSessionOptions): Promise<AIProviderSession>;
+  createSession(
+    options: CreateAIProviderSessionOptions,
+  ): Promise<AIProviderSession>;
   shutdown(session?: AIProviderSession): Promise<void>;
 };

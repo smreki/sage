@@ -9,19 +9,18 @@ export function createUsageTracker(model: AIModelChoice) {
     outputTokens: 0,
     cacheReadTokens: 0,
     cacheWriteTokens: 0,
-    maxContextWindowTokens: model.maxContextWindowTokens
+    maxContextWindowTokens: model.maxContextWindowTokens,
   };
 
   return {
     stats,
     attach(session: AIProviderSession) {
       return session.onUsage((event) => {
-        stats.model = event.model;
         stats.inputTokens += event.inputTokens ?? 0;
         stats.outputTokens += event.outputTokens ?? 0;
         stats.cacheReadTokens += event.cacheReadTokens ?? 0;
         stats.cacheWriteTokens += event.cacheWriteTokens ?? 0;
       });
-    }
+    },
   };
 }
