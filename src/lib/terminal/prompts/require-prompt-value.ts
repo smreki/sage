@@ -4,6 +4,7 @@ import { handlePromptCancel } from "@/lib/terminal/prompts/handle-prompt-cancel"
 
 type PromptScalar = string | boolean;
 
+/** Unwraps a clack prompt result, exiting the process with a cancel message if the user cancelled. */
 export function requirePromptValue<T extends PromptScalar>(value: T | symbol, cancelMessage: string): T {
   if (clack.isCancel(value)) {
     handlePromptCancel(cancelMessage);

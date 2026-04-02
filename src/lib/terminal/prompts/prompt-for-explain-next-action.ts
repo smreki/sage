@@ -2,13 +2,15 @@ import * as clack from "@clack/prompts";
 
 import { requirePromptValue } from "@/lib/terminal/prompts/require-prompt-value";
 
-import type { ExplainResponse } from "@/commands/explain/schemas";
+import type { SuggestedCommand } from "@/commands/explain/tools";
 
+/** The possible actions a user can take after receiving an explanation. */
 export type ExplainNextAction = "run" | "follow-up" | "new" | "cancel";
 
-export async function promptForExplainNextAction(response: ExplainResponse) {
+/** Prompts the user to choose what to do next: run the suggested command, ask a follow-up, start fresh, or exit. */
+export async function promptForExplainNextAction(suggestedCommand: SuggestedCommand | undefined): Promise<ExplainNextAction> {
   const options = [
-    ...(response.suggestedCommand?.command ? [{ value: "run", label: "Run suggested command", hint: response.suggestedCommand.command }] : []),
+    ...(suggestedCommand?.command ? [{ value: "run", label: "Run suggested command", hint: suggestedCommand.command }] : []),
     { value: "follow-up", label: "Ask a follow-up", hint: "Continue this session" },
     { value: "new", label: "Start a new explanation", hint: "Create a fresh session" },
     { value: "cancel", label: "Cancel", hint: "Exit Sage" }

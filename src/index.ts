@@ -18,13 +18,13 @@ program
 
 program
   .command("explain")
-  .description("Explain a terminal command with GitHub Copilot")
+  .description("Explain a terminal command using AI")
   .argument("[question...]", "Question to explain")
-  .option("-p, --provider <provider>", "AI provider to use", "copilot")
-  .option("-m, --model <model>", "Model to use")
-  .option("-e, --effort <effort>", "Reasoning effort")
-  .option("--no-short", "Show the full response")
-  .option("--show-usage", "Show model/token usage in the rendered response")
+  .option("-p, --provider <provider>", "AI provider (e.g. github-copilot, openai, anthropic, google)")
+  .option("-m, --model <model>", "Model to use (e.g. gpt-4o-mini, claude-sonnet-4)")
+  .option("-e, --effort <effort>", "Reasoning effort (low, medium, high, xhigh)")
+  .option("--detailed", "Show full response with all sections")
+  .option("--show-usage", "Show token usage and cost")
   .option("--bypass-permissions", "Skip local confirmation before running the suggested command")
   .action(async (questionParts, options) => {
     const question = Array.isArray(questionParts) ? questionParts.join(" ").trim() : undefined;

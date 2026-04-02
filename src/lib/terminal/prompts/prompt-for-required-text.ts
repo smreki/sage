@@ -2,6 +2,7 @@ import * as clack from "@clack/prompts";
 
 import { requirePromptValue } from "@/lib/terminal/prompts/require-prompt-value";
 
+/** Prompts the user for non-empty text input, or returns `initialValue` if already provided. */
 export async function promptForRequiredText(options: {
   initialValue?: string;
   message: string;

@@ -2,12 +2,13 @@ import * as clack from "@clack/prompts";
 
 import { requirePromptValue } from "@/lib/terminal/prompts/require-prompt-value";
 
-import type { AIModelChoice } from "@/lib/ai/models";
+import type { Model } from "@mariozechner/pi-ai";
 import type { ReasoningEffortValue } from "@/lib/ai/schemas";
 
-export async function promptToKeepModel(model: AIModelChoice, effort: ReasoningEffortValue | undefined) {
+/** Asks the user whether to keep the current model and effort level for the next explanation. */
+export async function promptToKeepModel(model: Model<any>, effort: ReasoningEffortValue | undefined): Promise<boolean> {
   const keep = await clack.confirm({
-    message: `Keep ${model.label}${effort ? ` (${effort})` : ""} for the next explanation?`,
+    message: `Keep ${model.name}${effort ? ` (${effort})` : ""} for the next explanation?`,
     initialValue: true
   });
 

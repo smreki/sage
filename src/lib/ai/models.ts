@@ -1,93 +1,55 @@
-import type { AIModelInfo } from "@/lib/ai/providers";
-import type { ReasoningEffortValue } from "@/lib/ai/schemas";
+import { getModels, type Model } from "@mariozechner/pi-ai";
+import { getOAuthProvider } from "@mariozechner/pi-ai/oauth";
 
-const fallbackEfforts: ReasoningEffortValue[] = ["low", "medium", "high"];
+import { getProviderOAuthCredentials } from "@/lib/ai/auth";
 
-export type AIModelChoice = {
-  configValue: string;
-  sdkModelId: string;
+/** A model paired with its display label for use in selection prompts. */
+export interface ModelChoice {
+  model: Model<any>;
   label: string;
-  supportsReasoningEffort: boolean;
-  supportedReasoningEfforts: ReasoningEffortValue[];
-  maxContextWindowTokens?: number;
-  modelInfo?: AIModelInfo;
-};
-
-export function buildModelChoices(configModels: string[], availableModels: AIModelInfo[]) {
-  const matched = configModels
-    .map((configValue) => {
-      const modelInfo = findModelInfo(configValue, availableModels);
-      if (modelInfo) {
-        return createModelChoice(configValue, modelInfo);
-      }
-
-      return createFallbackModelChoice(configValue);
-    })
-    .filter((value): value is AIModelChoice => value !== null);
-
-  if (matched.length > 0) {
-    return matched;
-  }
-
-  return availableModels.map((modelInfo) => createModelChoice(modelInfo.id, modelInfo));
 }
 
-export function findModelChoice(value: string, choices: AIModelChoice[]) {
-  const normalizedValue = normalizeModelToken(value);
+/**
+ * Applies OAuth-provider-specific model modifications when credentials
+ * are available (e.g. github-copilot rewrites model baseUrls).
+ */
+function applyOAuthModelModifications(provider: string, models: Model<any>[]): Model<any>[] {
+  const oauthProvider = getOAuthProvider(provider);
+  if (!oauthProvider?.modifyModels) return models;
 
-  return choices.find((choice) => {
-    return [choice.configValue, choice.sdkModelId, choice.label].some((candidate) => {
-      return normalizeModelToken(candidate) === normalizedValue;
-    });
-  });
+  const credentials = getProviderOAuthCredentials(provider);
+  if (!credentials) return models;
+
+  return oauthProvider.modifyModels(models, credentials);
 }
 
-function createModelChoice(configValue: string, modelInfo: AIModelInfo): AIModelChoice {
-  return {
-    configValue,
-    sdkModelId: modelInfo.id,
-    label: modelInfo.name,
-    supportsReasoningEffort: modelInfo.supportsReasoningEffort,
-    supportedReasoningEfforts: modelInfo.supportedReasoningEfforts ?? fallbackEfforts,
-    maxContextWindowTokens: modelInfo.maxContextWindowTokens,
-    modelInfo
-  };
+/** Returns all models for a provider as selectable choices. */
+export function getModelChoices(provider: string): ModelChoice[] {
+  const models = applyOAuthModelModifications(provider, getModels(provider as any));
+  return models.map((m) => ({
+    model: m,
+    label: `${m.name}${m.reasoning ? " (reasoning)" : ""}`
+  }));
 }
 
-function createFallbackModelChoice(configValue: string): AIModelChoice {
-  return {
-    configValue,
-    sdkModelId: configValue,
-    label: prettifyModelLabel(configValue),
-    supportsReasoningEffort: false,
-    supportedReasoningEfforts: fallbackEfforts,
-    maxContextWindowTokens: undefined,
-    modelInfo: undefined
-  };
+/** Finds a model by exact ID, partial ID match, or case-insensitive name match. */
+export function findModel(provider: string, modelId: string): Model<any> | undefined {
+  const models = applyOAuthModelModifications(provider, getModels(provider as any));
+  return models.find(
+    (m) =>
+      m.id === modelId ||
+      m.id.includes(modelId) ||
+      m.name.toLowerCase().includes(modelId.toLowerCase())
+  );
 }
 
-function findModelInfo(configValue: string, availableModels: AIModelInfo[]) {
-  const normalizedValue = normalizeModelToken(configValue);
-
-  return availableModels.find((modelInfo) => {
-    return normalizeModelToken(modelInfo.id) === normalizedValue || normalizeModelToken(modelInfo.name) === normalizedValue;
-  });
-}
-
-function normalizeModelToken(value: string) {
-  return value.toLowerCase().replace(/[\s_.]+/g, "-");
-}
-
-function prettifyModelLabel(value: string) {
-  return value
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map((part) => {
-      if (part.toLowerCase() === "gpt") {
-        return "GPT";
-      }
-
-      return part.charAt(0).toUpperCase() + part.slice(1);
-    })
-    .join(" ");
+/**
+ * Applies OAuth model modifications to a single already-resolved model.
+ *
+ * Call after authentication to ensure the model carries the correct
+ * baseUrl for providers that rewrite it (e.g. github-copilot).
+ */
+export function applyModelModifications(provider: string, model: Model<any>): Model<any> {
+  const modified = applyOAuthModelModifications(provider, [model]);
+  return modified[0] ?? model;
 }
