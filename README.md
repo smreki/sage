@@ -129,10 +129,6 @@ bun run build
 bun run dev -- explain
 ```
 
-## Project Status
-
-This project is under active iteration. Multiple providers are supported via `@mariozechner/pi-ai`, with OAuth-based authentication and automatic token management.
-
 ## License
 
 [MIT](./LICENSE)
