@@ -1,29 +1,41 @@
 import * as clack from "@clack/prompts";
 
-import { findModelChoice } from "@/lib/ai/models";
-
+import { findModel, getModelChoices } from "@/lib/ai/models";
+import { resolveModel } from "@/lib/ai/provider";
 import { requirePromptValue } from "@/lib/terminal/prompts/require-prompt-value";
 
-import type { AIModelChoice } from "@/lib/ai/models";
+import type { Model } from "@mariozechner/pi-ai";
 
-export async function promptForModelChoice(initialModel: string | undefined, defaultModel: string, modelChoices: AIModelChoice[]) {
+/**
+ * Resolves an AI model for the given provider. If `initialModel` matches a known model it is
+ * returned directly; otherwise the user is presented with an interactive picker.
+ */
+export async function promptForModelChoice(
+  initialModel: string | undefined,
+  defaultModel: string | undefined,
+  provider: string
+): Promise<Model<any>> {
+  const choices = getModelChoices(provider);
+
   if (initialModel) {
-    const chosen = findModelChoice(initialModel, modelChoices);
-
-    if (!chosen) {
-      throw new Error(`Unknown model \`${initialModel}\`. Available choices: ${modelChoices.map((choice) => choice.configValue).join(", ")}`);
+    const found = findModel(provider, initialModel);
+    if (!found) {
+      clack.log.warn(`Model "${initialModel}" not found for ${provider}. Choose from the list below.`);
+    } else {
+      return found;
     }
-
-    return chosen;
   }
 
+  // Try to select default model
+  const defaultFound = defaultModel ? findModel(provider, defaultModel) : undefined;
+
   const selected = await clack.select({
-    message: "Pick a model",
-    initialValue: findModelChoice(defaultModel, modelChoices)?.configValue ?? modelChoices[0]?.configValue,
-    options: modelChoices.map((choice) => ({
-      value: choice.configValue,
+    message: `Pick a model (${provider})`,
+    initialValue: defaultFound?.id ?? choices[0]?.model.id,
+    options: choices.map((choice) => ({
+      value: choice.model.id,
       label: choice.label,
-      hint: choice.supportsReasoningEffort ? "supports effort" : "fast default"
+      hint: choice.model.reasoning ? "reasoning" : undefined
     }))
   });
 
@@ -32,5 +44,5 @@ export async function promptForModelChoice(initialModel: string | undefined, def
     throw new Error("Model selection returned an unexpected value.");
   }
 
-  return findModelChoice(selectedValue, modelChoices) ?? modelChoices[0];
+  return resolveModel(provider, selectedValue);
 }

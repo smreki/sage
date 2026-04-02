@@ -1,35 +1,24 @@
 import { z } from "zod";
 
-import { aiProviderSchema } from "@/lib/ai/schemas/ai-provider-schema";
 import { reasoningEffortSchema } from "@/lib/ai/schemas/reasoning-effort-schema";
 
+/** Zod schema for a single AI provider's configuration (default model and reasoning effort). */
 export const aiProviderConfigSchema = z.object({
-  defaultModel: z.string().trim().min(1).default("raptor-mini"),
-  availableModels: z.array(z.string().trim().min(1)).min(1).default([
-    "raptor-mini",
-    "gpt-5-mini",
-    "claude-haiku-4.5"
-  ]),
+  defaultModel: z.string().optional(),
   defaultEffort: reasoningEffortSchema.default("low")
 });
 
+/** Zod schema for the top-level AI configuration: default provider, confirmation flag, and per-provider settings. */
 export const aiConfigSchema = z.object({
-  defaultProvider: aiProviderSchema.default("copilot"),
+  defaultProvider: z.string().default("github-copilot"),
   confirmBeforeRun: z.boolean().default(true),
-  providers: z.object({
-    copilot: aiProviderConfigSchema.default({
-      defaultModel: "raptor-mini",
-      availableModels: ["raptor-mini", "gpt-5-mini", "claude-haiku-4.5"],
-      defaultEffort: "low"
-    })
-  }).default({
-    copilot: {
-      defaultModel: "raptor-mini",
-      availableModels: ["raptor-mini", "gpt-5-mini", "claude-haiku-4.5"],
-      defaultEffort: "low"
-    }
+  providers: z.record(z.string(), aiProviderConfigSchema).default({
+    "github-copilot": { defaultEffort: "low" }
   })
 });
 
+/** Full AI configuration object. */
 export type AIConfig = z.infer<typeof aiConfigSchema>;
+
+/** Configuration for a single AI provider. */
 export type AIProviderConfig = z.infer<typeof aiProviderConfigSchema>;

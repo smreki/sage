@@ -6,6 +6,10 @@ import { execaCommand } from "execa";
 import { assessSuggestedCommand } from "@/lib/security/commands";
 import { renderCommandResult } from "@/lib/terminal/render";
 
+/**
+ * Evaluates a suggested command against safety rules, optionally prompts for
+ * user confirmation, executes it via execa, and renders the result.
+ */
 export async function maybeRunSuggestedCommand(command: string | undefined, bypassPermissions: boolean) {
   const assessed = assessSuggestedCommand(command);
 

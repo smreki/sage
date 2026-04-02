@@ -1,5 +1,5 @@
-export { formatBulletList } from "@/lib/terminal/render/format-bullet-list";
-export { formatKeyValueList } from "@/lib/terminal/render/format-key-value-list";
 export { renderCommandResult } from "@/lib/terminal/render/render-command-result";
+export { renderMarkdownSection } from "@/lib/terminal/render/render-markdown-section";
 export { note } from "@/lib/terminal/render/render-note";
-export { noteContentWidth, wrapText } from "@/lib/terminal/render/wrap-text";
+export { streamWithBar } from "@/lib/terminal/render/stream-with-bar";
+export { createThinkingSpinner } from "@/lib/terminal/render/thinking-spinner";

@@ -2,11 +2,21 @@ import * as clack from "@clack/prompts";
 
 import { requirePromptValue } from "@/lib/terminal/prompts/require-prompt-value";
 
-import type { AIModelChoice } from "@/lib/ai/models";
+import type { Model } from "@mariozechner/pi-ai";
 import type { ReasoningEffortValue } from "@/lib/ai/schemas";
 
-export async function promptForReasoningEffort(initialEffort: ReasoningEffortValue | undefined, defaultEffort: ReasoningEffortValue, model: AIModelChoice) {
-  if (!model.supportsReasoningEffort) {
+const effortLevels: ReasoningEffortValue[] = ["low", "medium", "high", "xhigh"];
+
+/**
+ * Prompts the user to select a reasoning effort level for reasoning-capable models.
+ * Returns `undefined` if the model does not support reasoning.
+ */
+export async function promptForReasoningEffort(
+  initialEffort: ReasoningEffortValue | undefined,
+  defaultEffort: ReasoningEffortValue,
+  model: Model<any>
+): Promise<ReasoningEffortValue | undefined> {
+  if (!model.reasoning) {
     return undefined;
   }
 
@@ -16,8 +26,8 @@ export async function promptForReasoningEffort(initialEffort: ReasoningEffortVal
 
   const effort = await clack.select({
     message: "Pick a reasoning effort",
-    initialValue: model.supportedReasoningEfforts.includes(defaultEffort) ? defaultEffort : model.supportedReasoningEfforts[0],
-    options: model.supportedReasoningEfforts.map((value: ReasoningEffortValue) => ({
+    initialValue: defaultEffort,
+    options: effortLevels.map((value) => ({
       value,
       label: value,
       hint: value === "low" ? "faster" : value === "xhigh" ? "deepest" : "balanced"

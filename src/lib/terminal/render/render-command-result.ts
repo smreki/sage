@@ -1,5 +1,6 @@
 import pc from "picocolors";
 
+/** Prints the result of a command execution to the console, showing the command, exit code, stdout, and stderr. */
 export function renderCommandResult(result: {
   command: string;
   exitCode: number;
