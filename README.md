@@ -12,24 +12,23 @@ It is currently focused on one core workflow:
 ## Features
 
 - built with Bun and TypeScript
-- provider abstraction for future AI backends
-- current provider: GitHub Copilot
+- multi-provider support via `@mariozechner/pi-ai` (GitHub Copilot, OpenAI, Anthropic, Google Gemini, Google Antigravity)
+- OAuth authentication with automatic token refresh
 - prompt-driven CLI with `commander` and `@clack/prompts`
 - response rendering with `@clack/prompts` and `picocolors`
 - safe suggested-command execution with local blocking rules
-- short mode by default, with optional full output and usage details
+- short mode by default, with optional detailed output and usage stats
+- follow-up and new-session flows without restarting
 
 ## Requirements
 
 - Bun
 - Node-compatible environment for the installed dependencies
-- GitHub Copilot CLI installed and authenticated
+- An API key or OAuth credentials for at least one supported provider
 
-Example:
+Supported providers: `github-copilot`, `openai-codex`, `anthropic`, `google-gemini-cli`, `google-antigravity`
 
-```bash
-copilot auth login
-```
+Authentication is resolved in order: environment variable, stored OAuth credentials, interactive OAuth login.
 
 ## Installation
 
@@ -53,41 +52,14 @@ bun run build
 
 ## Usage
 
-Start an interactive explain flow:
-
-```bash
-sage explain
-```
-
-Explain a command directly:
-
-```bash
-sage explain "what is whoami"
-```
-
-Choose a model and effort:
-
-```bash
-sage explain "what does ls -la do" --model raptor-mini --effort low
-```
-
-Show the full response instead of the short default:
-
-```bash
-sage explain "what is whoami" --no-short
-```
-
-Show usage details:
-
-```bash
-sage explain "what is whoami" --show-usage
-```
-
-Skip the local confirmation prompt before running the suggested command:
-
-```bash
-sage explain "what is whoami" --bypass-permissions
-```
+| Command                                                                | Description                                                             |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `sage explain`                                                         | Start an interactive explain flow                                       |
+| `sage explain "what is whoami"`                                        | Explain a command directly                                              |
+| `sage explain "what does ls -la do" --model gpt-5.4-mini --effort low` | Choose a model and effort                                               |
+| `sage explain "what is whoami" --detailed`                             | Show the full response instead of the short default                     |
+| `sage explain "what is whoami" --show-usage`                           | Show usage details                                                      |
+| `sage explain "what is whoami" --bypass-permissions`                   | Skip the local confirmation prompt before running the suggested command |
 
 ## Command Reference
 
@@ -97,11 +69,11 @@ Explains a terminal command or shell concept.
 
 Options:
 
-- `-p, --provider <provider>` - AI provider to use
-- `-m, --model <model>` - model to use
-- `-e, --effort <effort>` - reasoning effort
-- `--no-short` - show the full response
-- `--show-usage` - show model and token usage
+- `-p, --provider <provider>` - AI provider (e.g. `github-copilot`, `openai-codex`, `anthropic`)
+- `-m, --model <model>` - model to use (e.g. `gpt-5.4-mini`, `claude-sonnet-4`)
+- `-e, --effort <effort>` - reasoning effort (`low`, `medium`, `high`, `xhigh`)
+- `--detailed` - show the full response with all sections
+- `--show-usage` - show token usage and cost
 - `--bypass-permissions` - skip confirmation before running the suggested command
 
 Default behavior:
@@ -123,12 +95,11 @@ Current config shape:
 ```json
 {
   "ai": {
-    "defaultProvider": "copilot",
+    "defaultProvider": "openai-codex",
     "confirmBeforeRun": true,
     "providers": {
-      "copilot": {
-        "defaultModel": "raptor-mini",
-        "availableModels": ["raptor-mini", "gpt-5-mini", "claude-haiku-4.5"],
+      "openai-codex": {
+        "defaultModel": "gpt-5.4-mini",
         "defaultEffort": "low"
       }
     }
@@ -160,7 +131,7 @@ bun run dev -- explain
 
 ## Project Status
 
-This project is under active iteration. The provider abstraction is in place, but only the Copilot provider is implemented today.
+This project is under active iteration. Multiple providers are supported via `@mariozechner/pi-ai`, with OAuth-based authentication and automatic token management.
 
 ## License
 
